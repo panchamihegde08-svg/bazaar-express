@@ -25,6 +25,7 @@ import { Route as AuthenticatedAdminProductsRouteImport } from './routes/_authen
 import { Route as AuthenticatedAdminOrdersRouteImport } from './routes/_authenticated/admin/orders'
 import { Route as AuthenticatedAdminCategoriesRouteImport } from './routes/_authenticated/admin/categories'
 import { Route as AuthenticatedAdminAgentsRouteImport } from './routes/_authenticated/admin/agents'
+import { Route as AuthenticatedDeliveryAgentOrdersIdRouteImport } from './routes/_authenticated/delivery-agent/orders.$id'
 
 const CartRoute = CartRouteImport.update({
   id: '/cart',
@@ -111,6 +112,12 @@ const AuthenticatedAdminAgentsRoute =
     path: '/agents',
     getParentRoute: () => AuthenticatedAdminRouteRoute,
   } as any)
+const AuthenticatedDeliveryAgentOrdersIdRoute =
+  AuthenticatedDeliveryAgentOrdersIdRouteImport.update({
+    id: '/orders/$id',
+    path: '/orders/$id',
+    getParentRoute: () => AuthenticatedDeliveryAgentRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -128,6 +135,7 @@ export interface FileRoutesByFullPath {
   '/orders/$id': typeof AuthenticatedOrdersIdRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/delivery-agent/': typeof AuthenticatedDeliveryAgentIndexRoute
+  '/delivery-agent/orders/$id': typeof AuthenticatedDeliveryAgentOrdersIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -143,6 +151,7 @@ export interface FileRoutesByTo {
   '/orders/$id': typeof AuthenticatedOrdersIdRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/delivery-agent': typeof AuthenticatedDeliveryAgentIndexRoute
+  '/delivery-agent/orders/$id': typeof AuthenticatedDeliveryAgentOrdersIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -162,6 +171,7 @@ export interface FileRoutesById {
   '/_authenticated/orders/$id': typeof AuthenticatedOrdersIdRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/delivery-agent/': typeof AuthenticatedDeliveryAgentIndexRoute
+  '/_authenticated/delivery-agent/orders/$id': typeof AuthenticatedDeliveryAgentOrdersIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -181,6 +191,7 @@ export interface FileRouteTypes {
     | '/orders/$id'
     | '/admin/'
     | '/delivery-agent/'
+    | '/delivery-agent/orders/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -196,6 +207,7 @@ export interface FileRouteTypes {
     | '/orders/$id'
     | '/admin'
     | '/delivery-agent'
+    | '/delivery-agent/orders/$id'
   id:
     | '__root__'
     | '/'
@@ -214,6 +226,7 @@ export interface FileRouteTypes {
     | '/_authenticated/orders/$id'
     | '/_authenticated/admin/'
     | '/_authenticated/delivery-agent/'
+    | '/_authenticated/delivery-agent/orders/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -338,6 +351,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminAgentsRouteImport
       parentRoute: typeof AuthenticatedAdminRouteRoute
     }
+    '/_authenticated/delivery-agent/orders/$id': {
+      id: '/_authenticated/delivery-agent/orders/$id'
+      path: '/orders/$id'
+      fullPath: '/delivery-agent/orders/$id'
+      preLoaderRoute: typeof AuthenticatedDeliveryAgentOrdersIdRouteImport
+      parentRoute: typeof AuthenticatedDeliveryAgentRouteRoute
+    }
   }
 }
 
@@ -365,11 +385,14 @@ const AuthenticatedAdminRouteRouteWithChildren =
 
 interface AuthenticatedDeliveryAgentRouteRouteChildren {
   AuthenticatedDeliveryAgentIndexRoute: typeof AuthenticatedDeliveryAgentIndexRoute
+  AuthenticatedDeliveryAgentOrdersIdRoute: typeof AuthenticatedDeliveryAgentOrdersIdRoute
 }
 
 const AuthenticatedDeliveryAgentRouteRouteChildren: AuthenticatedDeliveryAgentRouteRouteChildren =
   {
     AuthenticatedDeliveryAgentIndexRoute: AuthenticatedDeliveryAgentIndexRoute,
+    AuthenticatedDeliveryAgentOrdersIdRoute:
+      AuthenticatedDeliveryAgentOrdersIdRoute,
   }
 
 const AuthenticatedDeliveryAgentRouteRouteWithChildren =
