@@ -72,13 +72,14 @@ function AdminShell() {
         <nav className="space-y-1">
           {nav.map((n) => {
             const active = n.exact ? pathname === n.to : pathname.startsWith(n.to);
+            const Icon = n.icon;
             return (
               <Link
                 key={n.to}
-                to={n.to}
+                to={n.to as "/admin"}
                 className={`flex items-center gap-2 rounded-lg px-3 py-2 text-sm ${active ? "bg-brand text-brand-foreground font-semibold" : "hover:bg-muted"}`}
               >
-                <n.icon className="h-4 w-4" /> {n.label}
+                <Icon className="h-4 w-4" /> {n.label}
               </Link>
             );
           })}
