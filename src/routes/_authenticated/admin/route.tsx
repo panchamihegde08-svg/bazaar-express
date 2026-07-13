@@ -11,13 +11,13 @@ export const Route = createFileRoute("/_authenticated/admin")({
   component: AdminShell,
 });
 
-const nav = [
+const nav: { to: string; label: string; icon: typeof LayoutDashboard; exact?: boolean }[] = [
   { to: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
   { to: "/admin/products", label: "Products", icon: Package },
   { to: "/admin/categories", label: "Categories", icon: FolderTree },
   { to: "/admin/orders", label: "Orders", icon: ListOrdered },
   { to: "/admin/agents", label: "Delivery agents", icon: Truck },
-] as const;
+];
 
 function AdminShell() {
   const { role, loading, user } = useCurrentUser();
