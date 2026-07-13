@@ -18,6 +18,7 @@ import { Route as AuthenticatedOrdersRouteImport } from './routes/_authenticated
 import { Route as AuthenticatedCheckoutRouteImport } from './routes/_authenticated/checkout'
 import { Route as AuthenticatedDeliveryAgentRouteRouteImport } from './routes/_authenticated/delivery-agent/route'
 import { Route as AuthenticatedAdminRouteRouteImport } from './routes/_authenticated/admin/route'
+import { Route as AuthenticatedDeliveryAgentIndexRouteImport } from './routes/_authenticated/delivery-agent/index'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin/index'
 import { Route as AuthenticatedOrdersIdRouteImport } from './routes/_authenticated/orders.$id'
 import { Route as AuthenticatedAdminProductsRouteImport } from './routes/_authenticated/admin/products'
@@ -70,6 +71,12 @@ const AuthenticatedAdminRouteRoute = AuthenticatedAdminRouteRouteImport.update({
   path: '/admin',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedDeliveryAgentIndexRoute =
+  AuthenticatedDeliveryAgentIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedDeliveryAgentRouteRoute,
+  } as any)
 const AuthenticatedAdminIndexRoute = AuthenticatedAdminIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -110,7 +117,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/cart': typeof CartRoute
   '/admin': typeof AuthenticatedAdminRouteRouteWithChildren
-  '/delivery-agent': typeof AuthenticatedDeliveryAgentRouteRoute
+  '/delivery-agent': typeof AuthenticatedDeliveryAgentRouteRouteWithChildren
   '/checkout': typeof AuthenticatedCheckoutRoute
   '/orders': typeof AuthenticatedOrdersRouteWithChildren
   '/category/$slug': typeof CategorySlugRoute
@@ -120,12 +127,12 @@ export interface FileRoutesByFullPath {
   '/admin/products': typeof AuthenticatedAdminProductsRoute
   '/orders/$id': typeof AuthenticatedOrdersIdRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
+  '/delivery-agent/': typeof AuthenticatedDeliveryAgentIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/cart': typeof CartRoute
-  '/delivery-agent': typeof AuthenticatedDeliveryAgentRouteRoute
   '/checkout': typeof AuthenticatedCheckoutRoute
   '/orders': typeof AuthenticatedOrdersRouteWithChildren
   '/category/$slug': typeof CategorySlugRoute
@@ -135,6 +142,7 @@ export interface FileRoutesByTo {
   '/admin/products': typeof AuthenticatedAdminProductsRoute
   '/orders/$id': typeof AuthenticatedOrdersIdRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
+  '/delivery-agent': typeof AuthenticatedDeliveryAgentIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -143,7 +151,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/cart': typeof CartRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRouteRouteWithChildren
-  '/_authenticated/delivery-agent': typeof AuthenticatedDeliveryAgentRouteRoute
+  '/_authenticated/delivery-agent': typeof AuthenticatedDeliveryAgentRouteRouteWithChildren
   '/_authenticated/checkout': typeof AuthenticatedCheckoutRoute
   '/_authenticated/orders': typeof AuthenticatedOrdersRouteWithChildren
   '/category/$slug': typeof CategorySlugRoute
@@ -153,6 +161,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/products': typeof AuthenticatedAdminProductsRoute
   '/_authenticated/orders/$id': typeof AuthenticatedOrdersIdRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
+  '/_authenticated/delivery-agent/': typeof AuthenticatedDeliveryAgentIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -171,12 +180,12 @@ export interface FileRouteTypes {
     | '/admin/products'
     | '/orders/$id'
     | '/admin/'
+    | '/delivery-agent/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/auth'
     | '/cart'
-    | '/delivery-agent'
     | '/checkout'
     | '/orders'
     | '/category/$slug'
@@ -186,6 +195,7 @@ export interface FileRouteTypes {
     | '/admin/products'
     | '/orders/$id'
     | '/admin'
+    | '/delivery-agent'
   id:
     | '__root__'
     | '/'
@@ -203,6 +213,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/products'
     | '/_authenticated/orders/$id'
     | '/_authenticated/admin/'
+    | '/_authenticated/delivery-agent/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -278,6 +289,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminRouteRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/delivery-agent/': {
+      id: '/_authenticated/delivery-agent/'
+      path: '/'
+      fullPath: '/delivery-agent/'
+      preLoaderRoute: typeof AuthenticatedDeliveryAgentIndexRouteImport
+      parentRoute: typeof AuthenticatedDeliveryAgentRouteRoute
+    }
     '/_authenticated/admin/': {
       id: '/_authenticated/admin/'
       path: '/'
@@ -345,6 +363,20 @@ const AuthenticatedAdminRouteRouteWithChildren =
     AuthenticatedAdminRouteRouteChildren,
   )
 
+interface AuthenticatedDeliveryAgentRouteRouteChildren {
+  AuthenticatedDeliveryAgentIndexRoute: typeof AuthenticatedDeliveryAgentIndexRoute
+}
+
+const AuthenticatedDeliveryAgentRouteRouteChildren: AuthenticatedDeliveryAgentRouteRouteChildren =
+  {
+    AuthenticatedDeliveryAgentIndexRoute: AuthenticatedDeliveryAgentIndexRoute,
+  }
+
+const AuthenticatedDeliveryAgentRouteRouteWithChildren =
+  AuthenticatedDeliveryAgentRouteRoute._addFileChildren(
+    AuthenticatedDeliveryAgentRouteRouteChildren,
+  )
+
 interface AuthenticatedOrdersRouteChildren {
   AuthenticatedOrdersIdRoute: typeof AuthenticatedOrdersIdRoute
 }
@@ -358,14 +390,15 @@ const AuthenticatedOrdersRouteWithChildren =
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminRouteRoute: typeof AuthenticatedAdminRouteRouteWithChildren
-  AuthenticatedDeliveryAgentRouteRoute: typeof AuthenticatedDeliveryAgentRouteRoute
+  AuthenticatedDeliveryAgentRouteRoute: typeof AuthenticatedDeliveryAgentRouteRouteWithChildren
   AuthenticatedCheckoutRoute: typeof AuthenticatedCheckoutRoute
   AuthenticatedOrdersRoute: typeof AuthenticatedOrdersRouteWithChildren
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminRouteRoute: AuthenticatedAdminRouteRouteWithChildren,
-  AuthenticatedDeliveryAgentRouteRoute: AuthenticatedDeliveryAgentRouteRoute,
+  AuthenticatedDeliveryAgentRouteRoute:
+    AuthenticatedDeliveryAgentRouteRouteWithChildren,
   AuthenticatedCheckoutRoute: AuthenticatedCheckoutRoute,
   AuthenticatedOrdersRoute: AuthenticatedOrdersRouteWithChildren,
 }
