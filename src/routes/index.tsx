@@ -7,6 +7,16 @@ import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/")({
   component: Home,
+  head: () => ({
+    meta: [
+      { title: "G.K Bazaar — Groceries delivered in 15 minutes" },
+      { name: "description", content: "Order fresh fruits, vegetables, dairy, snacks and daily essentials from G.K Bazaar. Cash on delivery, live order tracking and delivery in 15 minutes." },
+      { property: "og:title", content: "G.K Bazaar — Groceries delivered in 15 minutes" },
+      { property: "og:description", content: "Fresh groceries and daily essentials delivered to your door in minutes, with live tracking and cash on delivery." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+    ],
+  }),
 });
 
 function Home() {
@@ -18,6 +28,27 @@ function Home() {
         .select("*")
         .order("sort_order");
       if (error) throw error;
+      return data ?? [];
+    },
+  });
+
+  const bannersQ = useQuery({
+    queryKey: ["banners"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("banners")
+        .select("*")
+        .eq("is_active", true)
+        .order("sort_order");
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
+  const dealsQ = useQuery({
+    queryKey: ["coupons", "active"],
+    queryFn: async () => {
+      const { data } = await supabase.from("coupons").select("*").eq("is_active", true).limit(6);
       return data ?? [];
     },
   });
@@ -69,6 +100,44 @@ function Home() {
           </div>
         </div>
       </section>
+
+      {/* Offer strip */}
+      {(dealsQ.data?.length ?? 0) > 0 && (
+        <section className="mx-auto max-w-6xl px-4 pt-6">
+          <div className="flex gap-3 overflow-x-auto pb-1">
+            {dealsQ.data?.map((c) => (
+              <div key={c.id} className="flex min-w-56 items-center gap-3 rounded-xl border border-dashed border-brand bg-brand/5 p-3">
+                <div className="rounded-md bg-brand px-2 py-1 font-mono text-xs font-bold text-brand-foreground">{c.code}</div>
+                <div className="text-xs text-muted-foreground">{c.description}</div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Banners */}
+      {(bannersQ.data?.length ?? 0) > 0 && (
+        <section className="mx-auto max-w-6xl px-4 pt-6">
+          <div className="flex snap-x gap-4 overflow-x-auto pb-2">
+            {bannersQ.data?.map((b) => {
+              const inner = (
+                <div className="relative h-40 w-[22rem] shrink-0 snap-start overflow-hidden rounded-2xl border md:w-[30rem]">
+                  {b.image_url && <img src={b.image_url} alt={b.title} className="h-full w-full object-cover" loading="lazy" />}
+                  <div className="absolute inset-0 bg-gradient-to-r from-black/70 to-transparent p-5 text-white">
+                    <div className="text-lg font-black">{b.title}</div>
+                    <div className="text-xs opacity-90">{b.subtitle}</div>
+                  </div>
+                </div>
+              );
+              return b.link_slug ? (
+                <Link key={b.id} to="/category/$slug" params={{ slug: b.link_slug }}>{inner}</Link>
+              ) : (
+                <div key={b.id}>{inner}</div>
+              );
+            })}
+          </div>
+        </section>
+      )}
 
       {/* Categories */}
       <section className="mx-auto max-w-6xl px-4 py-8">
