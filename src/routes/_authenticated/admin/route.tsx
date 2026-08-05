@@ -1,7 +1,7 @@
 import { createFileRoute, Link, Outlet, useRouterState, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { toast } from "sonner";
-import { LayoutDashboard, Package, ListOrdered, FolderTree, Truck, ArrowLeft, ShieldCheck } from "lucide-react";
+import { LayoutDashboard, Package, ListOrdered, FolderTree, Truck, ArrowLeft, ShieldCheck, Image, Ticket } from "lucide-react";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { Button } from "@/components/ui/button";
 import { useServerFn } from "@tanstack/react-start";
@@ -17,6 +17,8 @@ const nav: { to: string; label: string; icon: typeof LayoutDashboard; exact?: bo
   { to: "/admin/categories", label: "Categories", icon: FolderTree },
   { to: "/admin/orders", label: "Orders", icon: ListOrdered },
   { to: "/admin/agents", label: "Delivery agents", icon: Truck },
+  { to: "/admin/banners", label: "Banners", icon: Image },
+  { to: "/admin/coupons", label: "Coupons", icon: Ticket },
 ];
 
 function AdminShell() {

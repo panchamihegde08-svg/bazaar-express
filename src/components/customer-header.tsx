@@ -1,5 +1,7 @@
-import { Link } from "@tanstack/react-router";
-import { ShoppingCart, Package, User as UserIcon, LogOut, LayoutDashboard, Truck } from "lucide-react";
+import { Link, useNavigate } from "@tanstack/react-router";
+import { useState } from "react";
+import { ShoppingCart, Package, User as UserIcon, LogOut, LayoutDashboard, Truck, Search, MapPin, Wallet } from "lucide-react";
+import { Input } from "@/components/ui/input";
 import { useCart } from "@/hooks/use-cart";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { Button } from "@/components/ui/button";
@@ -15,6 +17,8 @@ import {
 export function CustomerHeader() {
   const { count } = useCart();
   const { user, role } = useCurrentUser();
+  const navigate = useNavigate();
+  const [term, setTerm] = useState("");
 
   return (
     <header className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -31,7 +35,26 @@ export function CustomerHeader() {
           </div>
         </Link>
 
+        <form
+          className="relative ml-4 hidden max-w-md flex-1 md:block"
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (term.trim()) navigate({ to: "/search", search: { q: term.trim() } });
+          }}
+        >
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            value={term}
+            onChange={(e) => setTerm(e.target.value)}
+            placeholder='Search "milk", "atta", "chips"…'
+            className="pl-9"
+          />
+        </form>
+
         <div className="ml-auto flex items-center gap-2">
+          <Link to="/search" search={{ q: "" }} className="md:hidden">
+            <Button variant="ghost" size="icon" aria-label="Search"><Search className="h-5 w-5" /></Button>
+          </Link>
           <Link to="/orders">
             <Button variant="ghost" size="sm" className="gap-2">
               <Package className="h-4 w-4" /> Orders
@@ -67,6 +90,12 @@ export function CustomerHeader() {
                 )}
                 <DropdownMenuItem asChild>
                   <Link to="/orders"><Package className="mr-2 h-4 w-4" />My orders</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/account"><MapPin className="mr-2 h-4 w-4" />Addresses</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/account"><Wallet className="mr-2 h-4 w-4" />Wallet</Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
