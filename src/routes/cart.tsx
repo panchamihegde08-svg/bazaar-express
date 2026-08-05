@@ -3,6 +3,7 @@ import { Trash2, Plus, Minus, ShoppingBag } from "lucide-react";
 import { CustomerHeader } from "@/components/customer-header";
 import { useCart } from "@/hooks/use-cart";
 import { Button } from "@/components/ui/button";
+import { DELIVERY_FEE, FREE_DELIVERY_ABOVE } from "@/lib/pricing";
 
 export const Route = createFileRoute("/cart")({
   component: CartPage,
@@ -45,8 +46,19 @@ function CartPage() {
             ))}
             <div className="rounded-xl border bg-card p-4">
               <div className="flex items-center justify-between text-sm"><span>Subtotal</span><span>₹{total.toFixed(2)}</span></div>
-              <div className="flex items-center justify-between text-sm text-muted-foreground"><span>Delivery</span><span>FREE</span></div>
-              <div className="mt-2 flex items-center justify-between border-t pt-2 text-base font-bold"><span>Total</span><span>₹{total.toFixed(2)}</span></div>
+              <div className="flex items-center justify-between text-sm text-muted-foreground">
+                <span>Delivery</span>
+                <span>{total >= FREE_DELIVERY_ABOVE ? "FREE" : `₹${DELIVERY_FEE}`}</span>
+              </div>
+              {total < FREE_DELIVERY_ABOVE && (
+                <div className="mt-1 rounded-lg bg-brand/10 p-2 text-xs font-medium text-brand">
+                  Add ₹{(FREE_DELIVERY_ABOVE - total).toFixed(0)} more to get FREE delivery
+                </div>
+              )}
+              <div className="mt-2 flex items-center justify-between border-t pt-2 text-base font-bold">
+                <span>Total</span>
+                <span>₹{(total + (total >= FREE_DELIVERY_ABOVE ? 0 : DELIVERY_FEE)).toFixed(2)}</span>
+              </div>
               <Button size="lg" className="mt-4 w-full bg-brand text-brand-foreground hover:bg-brand/90" onClick={() => navigate({ to: "/checkout" })}>
                 Proceed to Checkout
               </Button>
