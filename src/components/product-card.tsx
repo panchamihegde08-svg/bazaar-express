@@ -1,3 +1,4 @@
+import { Link } from "@tanstack/react-router";
 import { Plus, Minus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/hooks/use-cart";
@@ -20,7 +21,7 @@ export function ProductCard({ product }: { product: Product }) {
 
   return (
     <div className="group flex flex-col rounded-xl border bg-card p-3 transition-shadow hover:shadow-md">
-      <div className="relative aspect-square overflow-hidden rounded-lg bg-muted">
+      <Link to="/product/$id" params={{ id: product.id }} className="relative block aspect-square overflow-hidden rounded-lg bg-muted">
         {product.image_url ? (
           <img
             src={product.image_url}
@@ -36,8 +37,10 @@ export function ProductCard({ product }: { product: Product }) {
             {discount}% OFF
           </span>
         )}
-      </div>
-      <div className="mt-2 min-h-10 text-sm font-medium leading-snug line-clamp-2">{product.name}</div>
+      </Link>
+      <Link to="/product/$id" params={{ id: product.id }} className="mt-2 min-h-10 text-sm font-medium leading-snug line-clamp-2 hover:text-brand">
+        {product.name}
+      </Link>
       <div className="mt-1 text-xs text-muted-foreground">{product.unit}</div>
       <div className="mt-auto flex items-center justify-between pt-2">
         <div>

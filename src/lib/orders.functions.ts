@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { computeDiscount, DELIVERY_FEE, FREE_DELIVERY_ABOVE } from "@/lib/pricing";
 
 const cartItem = z.object({
   product_id: z.string().uuid(),
@@ -16,6 +17,8 @@ export const placeOrder = createServerFn({ method: "POST" })
       customer_lat: z.number().nullable().optional(),
       customer_lng: z.number().nullable().optional(),
       notes: z.string().max(500).optional().nullable(),
+      coupon_code: z.string().max(40).nullable().optional(),
+      use_wallet: z.boolean().optional(),
     }).parse(d),
   )
   .handler(async ({ data, context }) => {
@@ -26,19 +29,63 @@ export const placeOrder = createServerFn({ method: "POST" })
       .in("id", productIds);
     if (pErr) throw new Error(pErr.message);
     const map = new Map(products?.map((p) => [p.id, p]));
-    let total = 0;
+    let subtotal = 0;
     const rows = data.items.map((it) => {
       const p = map.get(it.product_id);
       if (!p || !p.is_active) throw new Error(`Product unavailable`);
       const line = Number(p.price) * it.qty;
-      total += line;
+      subtotal += line;
       return { product_id: p.id, product_name: p.name, qty: it.qty, price: Number(p.price) };
     });
+
+    // Coupon
+    let discount = 0;
+    let couponCode: string | null = null;
+    if (data.coupon_code) {
+      const { data: coupon } = await context.supabase
+        .from("coupons")
+        .select("*")
+        .eq("code", data.coupon_code.toUpperCase().trim())
+        .eq("is_active", true)
+        .maybeSingle();
+      if (coupon && subtotal >= Number(coupon.min_order)) {
+        discount = computeDiscount(
+          {
+            discount_type: coupon.discount_type,
+            discount_value: Number(coupon.discount_value),
+            max_discount: coupon.max_discount != null ? Number(coupon.max_discount) : null,
+          },
+          subtotal,
+        );
+        couponCode = coupon.code;
+      }
+    }
+
+    const deliveryFee = subtotal >= FREE_DELIVERY_ABOVE ? 0 : DELIVERY_FEE;
+    let total = Math.max(0, subtotal - discount + deliveryFee);
+
+    // Wallet
+    let walletUsed = 0;
+    if (data.use_wallet) {
+      const { data: profile } = await context.supabase
+        .from("profiles")
+        .select("wallet_balance")
+        .eq("id", context.userId)
+        .maybeSingle();
+      const balance = Number(profile?.wallet_balance ?? 0);
+      walletUsed = Math.min(balance, total);
+      total -= walletUsed;
+    }
 
     const { data: order, error: oErr } = await context.supabase
       .from("orders")
       .insert({
         customer_id: context.userId,
+        subtotal,
+        delivery_fee: deliveryFee,
+        discount,
+        coupon_code: couponCode,
+        wallet_used: walletUsed,
         total,
         address: data.address,
         customer_lat: data.customer_lat ?? null,
@@ -54,6 +101,38 @@ export const placeOrder = createServerFn({ method: "POST" })
       .insert(rows.map((r) => ({ ...r, order_id: order.id })));
     if (iErr) throw new Error(iErr.message);
 
+    if (walletUsed > 0 || couponCode) {
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      if (walletUsed > 0) {
+        const { data: profile } = await supabaseAdmin
+          .from("profiles")
+          .select("wallet_balance")
+          .eq("id", context.userId)
+          .maybeSingle();
+        await supabaseAdmin
+          .from("profiles")
+          .update({ wallet_balance: Number(profile?.wallet_balance ?? 0) - walletUsed })
+          .eq("id", context.userId);
+        await supabaseAdmin.from("wallet_transactions").insert({
+          user_id: context.userId,
+          amount: -walletUsed,
+          reason: `Used on order #${order.id.slice(0, 8).toUpperCase()}`,
+          order_id: order.id,
+        });
+      }
+      if (couponCode) {
+        const { data: c } = await supabaseAdmin
+          .from("coupons")
+          .select("used_count")
+          .eq("code", couponCode)
+          .maybeSingle();
+        await supabaseAdmin
+          .from("coupons")
+          .update({ used_count: (c?.used_count ?? 0) + 1 })
+          .eq("code", couponCode);
+      }
+    }
+
     if (data.customer_lat != null && data.customer_lng != null) {
       await context.supabase.from("live_locations").insert({
         order_id: order.id,
@@ -63,6 +142,7 @@ export const placeOrder = createServerFn({ method: "POST" })
     }
     return order;
   });
+
 
 export const listMyOrders = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])

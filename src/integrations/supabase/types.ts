@@ -14,6 +14,75 @@ export type Database = {
   }
   public: {
     Tables: {
+      addresses: {
+        Row: {
+          created_at: string
+          full_address: string
+          id: string
+          is_default: boolean
+          label: string
+          lat: number | null
+          lng: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          full_address: string
+          id?: string
+          is_default?: boolean
+          label?: string
+          lat?: number | null
+          lng?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          full_address?: string
+          id?: string
+          is_default?: boolean
+          label?: string
+          lat?: number | null
+          lng?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      banners: {
+        Row: {
+          created_at: string
+          id: string
+          image_url: string | null
+          is_active: boolean
+          link_slug: string | null
+          sort_order: number
+          subtitle: string | null
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          link_slug?: string | null
+          sort_order?: number
+          subtitle?: string | null
+          title: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          link_slug?: string | null
+          sort_order?: number
+          subtitle?: string | null
+          title?: string
+        }
+        Relationships: []
+      }
       categories: {
         Row: {
           created_at: string
@@ -38,6 +107,51 @@ export type Database = {
           name?: string
           slug?: string
           sort_order?: number
+        }
+        Relationships: []
+      }
+      coupons: {
+        Row: {
+          code: string
+          created_at: string
+          description: string | null
+          discount_type: string
+          discount_value: number
+          expires_at: string | null
+          id: string
+          is_active: boolean
+          max_discount: number | null
+          min_order: number
+          usage_limit: number | null
+          used_count: number
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          description?: string | null
+          discount_type?: string
+          discount_value?: number
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          max_discount?: number | null
+          min_order?: number
+          usage_limit?: number | null
+          used_count?: number
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          description?: string | null
+          discount_type?: string
+          discount_value?: number
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          max_discount?: number | null
+          min_order?: number
+          usage_limit?: number | null
+          used_count?: number
         }
         Relationships: []
       }
@@ -122,41 +236,56 @@ export type Database = {
         Row: {
           address: string
           agent_id: string | null
+          coupon_code: string | null
           created_at: string
           customer_id: string
           customer_lat: number | null
           customer_lng: number | null
+          delivery_fee: number
+          discount: number
           id: string
           notes: string | null
           status: Database["public"]["Enums"]["order_status"]
+          subtotal: number
           total: number
           updated_at: string
+          wallet_used: number
         }
         Insert: {
           address: string
           agent_id?: string | null
+          coupon_code?: string | null
           created_at?: string
           customer_id: string
           customer_lat?: number | null
           customer_lng?: number | null
+          delivery_fee?: number
+          discount?: number
           id?: string
           notes?: string | null
           status?: Database["public"]["Enums"]["order_status"]
+          subtotal?: number
           total: number
           updated_at?: string
+          wallet_used?: number
         }
         Update: {
           address?: string
           agent_id?: string | null
+          coupon_code?: string | null
           created_at?: string
           customer_id?: string
           customer_lat?: number | null
           customer_lng?: number | null
+          delivery_fee?: number
+          discount?: number
           id?: string
           notes?: string | null
           status?: Database["public"]["Enums"]["order_status"]
+          subtotal?: number
           total?: number
           updated_at?: string
+          wallet_used?: number
         }
         Relationships: []
       }
@@ -168,9 +297,11 @@ export type Database = {
           id: string
           image_url: string | null
           is_active: boolean
+          is_featured: boolean
           mrp: number | null
           name: string
           price: number
+          rating: number
           stock: number
           unit: string | null
         }
@@ -181,9 +312,11 @@ export type Database = {
           id?: string
           image_url?: string | null
           is_active?: boolean
+          is_featured?: boolean
           mrp?: number | null
           name: string
           price: number
+          rating?: number
           stock?: number
           unit?: string | null
         }
@@ -194,9 +327,11 @@ export type Database = {
           id?: string
           image_url?: string | null
           is_active?: boolean
+          is_featured?: boolean
           mrp?: number | null
           name?: string
           price?: number
+          rating?: number
           stock?: number
           unit?: string | null
         }
@@ -216,18 +351,21 @@ export type Database = {
           full_name: string | null
           id: string
           phone: string | null
+          wallet_balance: number
         }
         Insert: {
           created_at?: string
           full_name?: string | null
           id: string
           phone?: string | null
+          wallet_balance?: number
         }
         Update: {
           created_at?: string
           full_name?: string | null
           id?: string
           phone?: string | null
+          wallet_balance?: number
         }
         Relationships: []
       }
@@ -251,6 +389,41 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      wallet_transactions: {
+        Row: {
+          amount: number
+          created_at: string
+          id: string
+          order_id: string | null
+          reason: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          id?: string
+          order_id?: string | null
+          reason: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          id?: string
+          order_id?: string | null
+          reason?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wallet_transactions_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
