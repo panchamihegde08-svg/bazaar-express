@@ -1,15 +1,12 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { computeDiscount } from "@/lib/shop.functions";
+import { computeDiscount, DELIVERY_FEE, FREE_DELIVERY_ABOVE } from "@/lib/pricing";
 
 const cartItem = z.object({
   product_id: z.string().uuid(),
   qty: z.number().int().positive().max(50),
 });
-
-export const FREE_DELIVERY_ABOVE = 199;
-export const DELIVERY_FEE = 25;
 
 export const placeOrder = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
